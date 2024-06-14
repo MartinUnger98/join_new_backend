@@ -3,8 +3,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ContactSerializer
 from rest_framework import status
+from .models import Contact
 
 class LoginView(ObtainAuthToken):
      def post(self, request, *args, **kwargs):
@@ -26,3 +27,10 @@ class UserCreate(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ContactView(APIView):
+    def get(self, request, format=None):
+        contacts = Contact.objects.all()
+        serializer = ContactSerializer(contacts, many=True)
+        return Response(serializer.data)

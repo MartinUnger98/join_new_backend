@@ -2,6 +2,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from .models import Contact
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -29,3 +30,8 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data['email']
         )
         return user
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = '__all__'
