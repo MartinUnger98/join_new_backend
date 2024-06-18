@@ -6,6 +6,9 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer, ContactSerializer
 from rest_framework import status
 from .models import Contact
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 class LoginView(ObtainAuthToken):
      def post(self, request, *args, **kwargs):
@@ -30,6 +33,9 @@ class UserCreate(APIView):
     
 
 class ContactView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     def get(self, request, format=None):
         contacts = Contact.objects.all()
         serializer = ContactSerializer(contacts, many=True)
