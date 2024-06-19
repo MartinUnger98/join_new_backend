@@ -12,11 +12,9 @@ from django.core import serializers
 from django.http import HttpResponse
 from rest_framework import viewsets
 
-
 class LoginView(ObtainAuthToken):
      def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
@@ -25,7 +23,7 @@ class LoginView(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
-        
+
 class UserCreate(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -33,25 +31,22 @@ class UserCreate(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 class ContactView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
-    
+
     def get(self, request, format=None):
         contacts = Contact.objects.all()
         serializer = ContactSerializer(contacts, many=True)
         return Response(serializer.data)
-    
-    def create(self, request):
-        contact = Contact.objects.create(name = self.request.POST.get('name', ''), 
-                                         email = self.request.POST.get('email', ''), 
-                                         phone = self.request.POST.get('phone', ''),
-                                         user= request.user
-                                         )
+
+    def post(self, request):
+        contact = Contact.objects.create(name=request.data.get('name', ''), 
+                                         email=request.data.get('email', ''), 
+                                         phone=request.data.get('phone', ''),
+                                         user=request.user)
         serialized_obj = serializers.serialize('json', [contact, ]) 
         return HttpResponse(serialized_obj, content_type='application/json')
-        
