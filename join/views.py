@@ -8,6 +8,9 @@ from rest_framework import status
 from .models import Contact
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.core import serializers
+from django.http import HttpResponse
+from rest_framework import viewsets
 
 
 class LoginView(ObtainAuthToken):
@@ -35,8 +38,20 @@ class UserCreate(APIView):
 class ContactView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
     
     def get(self, request, format=None):
         contacts = Contact.objects.all()
         serializer = ContactSerializer(contacts, many=True)
         return Response(serializer.data)
+    
+    def create(self, request):
+        contact = Contact.objects.create(name = self.request.POST.get('name', ''), 
+                                         email = self.request.POST.get('email', ''), 
+                                         phone = self.request.POST.get('phone', ''),
+                                         user= request.user
+                                         )
+        serialized_obj = serializers.serialize('json', [contact, ]) 
+        return HttpResponse(serialized_obj, content_type='application/json')
+        
