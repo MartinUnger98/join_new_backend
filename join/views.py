@@ -44,9 +44,12 @@ class ContactView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        contact = Contact.objects.create(name=request.data.get('name', ''), 
+        serializer = ContactSerializer(data=request.data)
+        if serializer.is_valid():
+            contact = Contact.objects.create(name=request.data.get('name', ''), 
                                          email=request.data.get('email', ''), 
                                          phone=request.data.get('phone', ''),
                                          user=request.user)
-        serialized_obj = serializers.serialize('json', [contact, ]) 
-        return HttpResponse(serialized_obj, content_type='application/json')
+            serialized_obj = serializers.serialize('json', [contact, ]) 
+            return HttpResponse(serialized_obj, content_type='application/json')
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
