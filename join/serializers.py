@@ -37,6 +37,10 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
     def validate_email(self, value):
-        if Contact.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
+        if self.instance:
+            if Contact.objects.filter(email=value).exclude(pk=self.instance.pk).exists():
+                raise serializers.ValidationError("Email already exists")
+        else:
+            if Contact.objects.filter(email=value).exists():
+                raise serializers.ValidationError("Email already exists")
         return value

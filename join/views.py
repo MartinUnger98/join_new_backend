@@ -10,7 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.core import serializers
 from django.http import HttpResponse
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+
 
 class LoginView(ObtainAuthToken):
      def post(self, request, *args, **kwargs):
@@ -56,3 +57,19 @@ class ContactView(APIView):
             serialized_obj = serializers.serialize('json', [contact, ]) 
             return HttpResponse(serialized_obj, content_type='application/json')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        contact = get_object_or_404(Contact, pk=pk)
+        serializer = ContactSerializer(contact, data=request.data, partial=True)
+        if serializer.is_valid():
+            contact = serializer.save()
+            serialized_obj = serializers.serialize('json', [contact, ]) 
+            return HttpResponse(serialized_obj, content_type='application/json')
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, *args, **kwargs):
+        pk = kwargs.get('pk')
+        contact = get_object_or_404(Contact, pk=pk)
+        contact.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

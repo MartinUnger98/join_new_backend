@@ -23,5 +23,6 @@ urlpatterns = [
     path('login/', LoginView.as_view()),
     path('register/', UserCreate.as_view()),
     path('contacts/', ContactView.as_view()),
+    path('contacts/<int:pk>/', ContactView.as_view()),
         
 ]
