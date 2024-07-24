@@ -3,9 +3,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ContactSerializer
+from .serializers import UserSerializer, ContactSerializer, TaskSerializer
 from rest_framework import status
-from .models import Contact
+from .models import Contact, Task, Subtask
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.core import serializers
@@ -73,3 +73,36 @@ class ContactView(APIView):
         contact = get_object_or_404(Contact, pk=pk)
         contact.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class TaskView(APIView):
+    serializer_class = TaskSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            task_data = serializer.validated_data
+            task = Task.objects.create(
+                title=task_data['title'],
+                description=task_data['description'],
+                dueDate=task_data['dueDate'],
+                priority=task_data['priority'],
+                category=task_data['category']
+            )
+
+            contact_ids = request.data.get('assignedTo', [])
+            for contact_id in contact_ids:
+                try:
+                    contact = Contact.objects.get(id=contact_id)
+                    task.assignedTo.add(contact)
+                except Contact.DoesNotExist:
+                    return Response({'error': f"Contact with id {contact_id} does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+            subtasks_data = task_data.get('subtasks', [])
+            for subtask_data in subtasks_data:
+                Subtask.objects.create(task=task, **subtask_data)
+
+            task.save()
+            return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

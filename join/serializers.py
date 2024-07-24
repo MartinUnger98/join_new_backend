@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Contact
+from .models import Contact, Task, Subtask
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -44,3 +44,19 @@ class ContactSerializer(serializers.ModelSerializer):
             if Contact.objects.filter(email=value).exists():
                 raise serializers.ValidationError("Email already exists")
         return value
+    
+class SubtaskSerializer(serializers.ModelSerializer):
+    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), required=False)   
+    class Meta:
+        model = Subtask
+        fields = '__all__'
+ 
+    
+class TaskSerializer(serializers.ModelSerializer):
+    assignedTo = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), many=True)
+    subtasks = SubtaskSerializer(many=True, required=False)
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'description', 'assignedTo', 'dueDate', 'priority', 'category', 'subtasks']
+
+
