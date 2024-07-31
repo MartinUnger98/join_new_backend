@@ -43,12 +43,19 @@ class Task(models.Model):
         ('User Story', 'User Story'),
         ('Bug', 'Bug')
     ]
+    STATUSES = [
+        ('To do', 'To do'),
+        ('In progress', 'In progress'),
+        ('Await feedback', 'Await feedback'),
+        ('Done', 'Done'),        
+    ]
     title = models.CharField(max_length=40)
     description = models.CharField(max_length=255)
     assignedTo = models.ManyToManyField(Contact, related_name='tasks')
     dueDate = models.DateField()
     priority = models.CharField(max_length=10, choices=PRIOS)
     category = models.CharField(max_length=20,choices=CATEGORIES)
+    status = models.CharField(max_length=15,choices=STATUSES)
     
     def __str__(self):
         return self.title
