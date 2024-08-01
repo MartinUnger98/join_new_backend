@@ -88,7 +88,8 @@ class TaskView(APIView):
                 description=task_data['description'],
                 dueDate=task_data['dueDate'],
                 priority=task_data['priority'],
-                category=task_data['category']
+                category=task_data['category'],
+                status=task_data['status']
             )
 
             contact_ids = request.data.get('assignedTo', [])
