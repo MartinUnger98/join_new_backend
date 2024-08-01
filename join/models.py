@@ -28,6 +28,7 @@ class Contact(models.Model):
 class Subtask(models.Model):
     value = models.CharField(max_length=255)
     edit = models.BooleanField(default=False)
+    done = models.BooleanField(default=False)
     task = models.ForeignKey('Task', related_name='subtasks', on_delete=models.CASCADE)
 
     def __str__(self):
