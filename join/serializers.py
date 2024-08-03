@@ -58,5 +58,30 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'assignedTo', 'dueDate', 'priority', 'category', 'subtasks', 'status']
+        
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.dueDate = validated_data.get('dueDate', instance.dueDate)
+        instance.priority = validated_data.get('priority', instance.priority)
+        instance.category = validated_data.get('category', instance.category)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
 
+        if 'assignedTo' in validated_data:
+            instance.assignedTo.set(validated_data['assignedTo'])
+
+        if 'subtasks' in validated_data:
+            subtasks_data = validated_data.pop('subtasks')
+            for subtask_data in subtasks_data:
+                subtask_id = subtask_data.get('id')
+                if subtask_id:
+                    subtask = Subtask.objects.get(id=subtask_id, task=instance)
+                    subtask.value = subtask_data.get('value', subtask.value)
+                    subtask.edit = subtask_data.get('edit', subtask.edit)
+                    subtask.save()
+                else:
+                    Subtask.objects.create(task=instance, **subtask_data)
+        
+        return instance
 

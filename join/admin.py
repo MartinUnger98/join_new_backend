@@ -6,6 +6,7 @@ class SubtaskInline(admin.TabularInline):
     extra = 1
 
 class TaskAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title')
     inlines = [SubtaskInline]
 
 admin.site.register(Contact)
