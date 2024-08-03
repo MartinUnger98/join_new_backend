@@ -55,10 +55,11 @@ class SubtaskSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     assignedTo = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), many=True)
     subtasks = SubtaskSerializer(many=True, required=False)
+    
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'assignedTo', 'dueDate', 'priority', 'category', 'subtasks', 'status']
-        
+    
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
@@ -73,15 +74,22 @@ class TaskSerializer(serializers.ModelSerializer):
 
         if 'subtasks' in validated_data:
             subtasks_data = validated_data.pop('subtasks')
+            subtask_ids = [subtask_data['id'] for subtask_data in subtasks_data if 'id' in subtask_data]
+
+            for subtask in instance.subtasks.all():
+                if subtask.id not in subtask_ids:
+                    subtask.delete()
+
             for subtask_data in subtasks_data:
                 subtask_id = subtask_data.get('id')
                 if subtask_id:
                     subtask = Subtask.objects.get(id=subtask_id, task=instance)
                     subtask.value = subtask_data.get('value', subtask.value)
                     subtask.edit = subtask_data.get('edit', subtask.edit)
+                    subtask.done = subtask_data.get('done', subtask.done)
                     subtask.save()
                 else:
+                    subtask_data.pop('task', None)
                     Subtask.objects.create(task=instance, **subtask_data)
         
         return instance
-
