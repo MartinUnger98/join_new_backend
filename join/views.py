@@ -123,4 +123,10 @@ class TaskView(APIView):
             return HttpResponse(serialized_obj, content_type='application/json')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        task = get_object_or_404(Task, pk=pk)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
             
