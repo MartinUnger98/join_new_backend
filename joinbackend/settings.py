@@ -142,3 +142,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
+
+
+import environ
+import os
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+GUEST_USERNAME = env('GUEST_USERNAME')
+GUEST_PASSWORD = env('GUEST_PASSWORD')
+GUEST_EMAIL = env('GUEST_EMAIL')
