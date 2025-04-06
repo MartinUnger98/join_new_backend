@@ -34,6 +34,7 @@ class Subtask(models.Model):
     def __str__(self):
         return self.value
 class Task(models.Model):
+    """A task that can be assigned to contacts, with priority and status."""
     PRIOS = [
         ('Urgent', 'Urgent'),
         ('Medium', 'Medium'),
@@ -52,8 +53,8 @@ class Task(models.Model):
     ]
     title = models.CharField(max_length=40)
     description = models.CharField(max_length=255)
-    assignedTo = models.ManyToManyField(Contact, related_name='tasks')
-    dueDate = models.DateField()
+    assigned_to = models.ManyToManyField(Contact, related_name='tasks')
+    due_date = models.DateField()
     priority = models.CharField(max_length=10, choices=PRIOS)
     category = models.CharField(max_length=20,choices=CATEGORIES)
     status = models.CharField(max_length=15,choices=STATUSES)
