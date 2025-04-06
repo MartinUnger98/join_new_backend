@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from .models import Contact, Task, Subtask
-from .serializers import UserSerializer, ContactSerializer, TaskSerializer
+from .serializers import UserSerializer, ContactSerializer, TaskSerializer, CustomAuthTokenSerializer
 from .utils import update_subtasks
 
 
@@ -20,6 +20,8 @@ class LoginView(ObtainAuthToken):
     """
     Authenticates a user and returns a token with basic user info.
     """
+    serializer_class = CustomAuthTokenSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)

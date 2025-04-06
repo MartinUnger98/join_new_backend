@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Contact, Task, Subtask
 from .utils import update_subtasks
+from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -108,3 +109,28 @@ class TaskSerializer(serializers.ModelSerializer):
             update_subtasks(instance, validated_data.pop('subtasks'))
 
         return instance
+
+class CustomAuthTokenSerializer(serializers.Serializer):
+    username_or_email = serializers.CharField(label="Username or Email")
+    password = serializers.CharField(label="Password", style={'input_type': 'password'}, trim_whitespace=False)
+
+    def validate(self, attrs):
+        username_or_email = attrs.get('username_or_email')
+        password = attrs.get('password')
+        user = None
+        if '@' in username_or_email:
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                username = user_obj.username
+            except User.DoesNotExist:
+                raise serializers.ValidationError("Benutzer mit dieser E-Mail existiert nicht.")
+        else:
+            username = username_or_email
+
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            raise serializers.ValidationError("Ungültige Zugangsdaten.")
+
+        attrs['user'] = user
+        return attrs

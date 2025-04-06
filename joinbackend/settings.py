@@ -150,12 +150,7 @@ import os
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-#use when .env is created
-#GUEST_USERNAME = env('GUEST_USERNAME')
-#GUEST_PASSWORD = env('GUEST_PASSWORD')
-#GUEST_EMAIL = env('GUEST_EMAIL')
-
-# Guest user credentials (used for /guest-login/)
-GUEST_USERNAME = "guest_user"
-GUEST_PASSWORD = "GuestJoinBackend#2024"
-GUEST_EMAIL = "guestLogin@guest.com"
+#guest user credentials for guest login
+GUEST_USERNAME = env('GUEST_USERNAME')
+GUEST_PASSWORD = env('GUEST_PASSWORD')
+GUEST_EMAIL = env('GUEST_EMAIL')
