@@ -29,23 +29,19 @@ class LoginView(ObtainAuthToken):
 
 class GuestLoginView(APIView):
     def post(self, request, *args, **kwargs):
-        # Hole Gastdaten aus settings.py, die aus der .env-Datei geladen wurden
         guest_username = settings.GUEST_USERNAME
         guest_password = settings.GUEST_PASSWORD
         guest_email = settings.GUEST_EMAIL
 
-        # Hole oder erstelle den Gast-Benutzer
         guest_user, created = User.objects.get_or_create(
             username=guest_username,
             defaults={'email': guest_email}
         )
 
-        # Setze Passwort nur, falls der Benutzer gerade erstellt wurde
         if created:
             guest_user.set_password(guest_password)
             guest_user.save()
 
-        # Generiere oder hole das Token
         token, _ = Token.objects.get_or_create(user=guest_user)
         return Response({
             'token': token.key,
